@@ -1,35 +1,31 @@
 function matnplot(filename)
 filen = [filename,'.mat'];
 load(filen);
-[WheelFxN,WheelFyN,WheelFzN,MotorFxN,MotorFyN,MotorFzN] = ... 
-    ForceConvert2N(WheelFxN,WheelFyN,WheelFzN,MotorFxN,MotorFyN,MotorFzN);
-SumFxN = WheelFxN + MotorFxN;
-SumFyN = WheelFyN + MotorFyN;
-SumFzN = WheelFzN + MotorFzN;
-Time = 0.0005*Time;
 %% Signal Conditioning
 fs = 2000;    %SyqNet update rate
 rollerW = .08;
- crrZ = detrendTs(SumFzN,rollerW,3);
- crrX = detrendTs(SumFxN,rollerW,3);
- crrY = detrendTs(SumFyN,rollerW,3);
- crrZwDC = addDC(SumFzN,crrZ);
- crrXwDC = addDC(SumFxN,crrX);
- crrYwDC = addDC(SumFyN,crrY);
+bufZ = 1;
+bufT = 1;
+%  crrZ = detrendTs(SumFzN,rollerW,3);
+%  crrX = detrendTs(SumFxN,rollerW,3);
+%  crrY = detrendTs(SumFyN,rollerW,3);
+%  crrZwDC = addDC(SumFzN,crrZ);
+%  crrXwDC = addDC(SumFxN,crrX);
+%  crrYwDC = addDC(SumFyN,crrY);
  fb = 10;
  filtorder = 3;
  [b,a] = butter(filtorder,(fb/(fs*0.5)),'low');
- filcrrZ = filtfilt(b,a,crrZwDC);
- filcrrX = filtfilt(b,a,crrXwDC);
- filcrrY = filtfilt(b,a,crrYwDC);
- NCreepX = abs(filcrrX./filcrrZ);
- NCreepX_m = median(NCreepX);
- NCreepX_s = std(NCreepX);
- midMark = NCreepX_m;
- lowMark = NCreepX_m - 2*NCreepX_s;
- highMark = NCreepX_m + 2*NCreepX_s;
- figure;
- stem(Time,NCreepX);
+ filcrrX = filtfilt(b,a,SumFxN);
+ filcrrY = filtfilt(b,a,SumFyN);
+ filcrrZ = filtfilt(b,a,SumFzN);
+%  NCreepX = abs(filcrrX./filcrrZ);
+%  NCreepX_m = median(NCreepX);
+%  NCreepX_s = std(NCreepX);
+%  midMark = NCreepX_m;
+%  lowMark = NCreepX_m - 2*NCreepX_s;
+%  highMark = NCreepX_m + 2*NCreepX_s;
+%  figure;
+%  stem(Time,NCreepX);
  %% Finding Means and Standard deviations
 MeanWFxN = mean(WheelFxN);
 MeanWFyN = mean(WheelFyN);
@@ -37,9 +33,9 @@ MeanWFzN = mean(WheelFzN);
 MeanMFxN = mean(MotorFxN);
 MeanMFyN = mean(MotorFyN);
 MeanMFzN = mean(MotorFzN);
-MeanSFxN = mean(filcrrX);
-MeanSFyN = mean(filcrrY);
-MeanSFzN = mean(filcrrZ);
+MeanSFxN = mean(SumFxN);
+MeanSFyN = mean(SumFyN);
+MeanSFzN = mean(SumFzN);
 StdDevWFxN = std(WheelFxN);
 StdDevWFyN = std(WheelFyN);
 StdDevWFzN = std(WheelFzN);
@@ -72,42 +68,61 @@ LegendSFz = ['Vertical- ', 'Mean: ', num2str(MeanSFzN), ' SD: ', ...
 %% Actual Plotting
 h(1) = figure;
 ax1 = subplotfill(2,2,1);
-plot(Time,WheelFxN, '-b');
+plot(Time,WheelFyN, '-g');
 hold on
-plot(Time, WheelFyN, '-g');
+plot(Time, WheelFxN, '-b');
 hold on
 plot(Time, WheelFzN, '-r');
 ylabel(ax1,'Wheel Forces');
-legend(LegendWFx,LegendWFy,LegendWFz);
+legend(LegendWFy,LegendWFx,LegendWFz);
 legend(ax1, 'boxoff');
 legend(ax1, 'Location', 'NorthEast');
 legend(ax1,'show');
 removewhitespace;
 ax2 = subplotfill(2,2,3);
-plot(Time,MotorFxN, '-b');
+plot(Time,MotorFyN, '-g');
 hold on
-plot(Time, MotorFyN, '-g');
+plot(Time, MotorFxN, '-b');
 hold on
 plot(Time, MotorFzN, '-r');
 ylabel(ax2,'Motor Forces');
-legend(LegendMFx,LegendMFy,LegendMFz);
+legend(LegendMFy,LegendMFx,LegendMFz);
 legend(ax2, 'boxoff');
 legend(ax2, 'Location', 'NorthEast');
 legend(ax2,'show');
 removewhitespace;
 ax3 = subplotfill(1,2,2);
-plot(Time,filcrrX, '-b');
 hold on
-plot(Time, filcrrY, '-g');
-hold on
-plot(Time, filcrrZ, 'r');
+plot(Time,SumFyN, '-g');
+plot(Time,SumFxN, '-b');
+plot(Time,SumFzN, 'r');
+plot(Time,filcrrX,'y');
+plot(Time,filcrrZ,'Color',[0 0.6 0],'LineWidth',2);
 ylabel(ax3,'Wheel + Motor Forces Corrected n Filtered');
-legend(LegendSFx,LegendSFy,LegendSFz);
+title(filen);
+legend(LegendSFy,LegendSFx,LegendSFz,'Filtered X','Filtered Z');
 legend(ax3, 'boxoff');
 legend(ax3, 'Location', 'NorthEast');
 legend(ax3,'show');
 removewhitespace;
 set(findall(gcf,'type','text'),'fontSize',8);
+figure;
+subplotfill(1,2,1);
+hist(filcrrX,200);
+title('Filtered X Histogram');
+removewhitespace;
+subplotfill(1,2,2);
+hist(filcrrZ,200);
+title('Filtered Z Histogram');
+removewhitespace;
+K1500 = find(((filcrrZ <= -1500 + bufZ) & (filcrrZ >= -1500 - bufZ))  & ((Time <=  100 + bufT) & (Time >= 100 - bufT)));
+figure;
+subplotfill(1,2,1);
+hist(filcrrX(K1500),100);
+title(sprintf('Fx when Fz is 1500 +/- %d, Time Buff %0.1f', bufZ, bufT));
+subplotfill(1,2,2);
+hist(filcrrZ(K1500),20);
+title(sprintf('Fz when 1500 +/- %d, Time Buff %0.1f',bufZ,bufT));
  % nsample = length(crrZ);
 % windowsize = round(nsample*1);
 % ovlp = round(windowsize*0);
