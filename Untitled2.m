@@ -5,7 +5,7 @@ clear all
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
-fb = 50;
+fb = 40;
 filtorder = 3;
 linspeed = 1;
 mu = 1;
