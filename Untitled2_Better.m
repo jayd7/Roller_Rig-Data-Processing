@@ -1,34 +1,42 @@
 close all
 clear all
-%cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\3-16-17');
+date = '04-27-17';
+cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\4-27-17');
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
 fb = 50;
 filtorder = 3;
 linspeed = 3;
-mu = 0.33;
+mu = 1;
+repsid = [1,2];
 %% Load both files, filter and then merge force data
-load('RR_04-25-17_18.mat');
+load(['RR_',date,'_',num2str(repsid(1)),'.mat']);
 SumFzN1 = SumFzN;
 SumFxN1 = SumFxN;
 SumFyN1 = SumFyN;
 WheelVAms1 = WheelVAms;
 WheelVCms1 = WheelVCms;
 Time1 = Time;
-% load('RR_03-16-17_8.mat');
-% SumFzN2 = SumFzN;
-% SumFxN2 = SumFxN;
-% SumFyN2 = SumFyN;
-% WheelVAms2 = WheelVAms;
-% WheelVCms2 = WheelVCms;
-% Time2 = 250 + Time;
-% SumFzN = [SumFzN1;SumFzN2];
-% SumFxN = [SumFxN1;SumFxN2];
-% SumFyN = [SumFyN1;SumFyN2];
-% Time = [Time1;Time2];
-% fullVAms = [WheelVAms1;WheelVAms2];
-% fullVCms = [WheelVCms1;WheelVCms2];
+% SumFzN = [SumFzN1];
+% SumFxN = [SumFxN1];
+% SumFyN = [SumFyN1];
+% Time = [Time1];
+% fullVAms = [WheelVAms1];
+% fullVCms = [WheelVCms1];
+load(['RR_',date,'_',num2str(repsid(2)),'.mat']);
+SumFzN2 = SumFzN;
+SumFxN2 = SumFxN;
+SumFyN2 = SumFyN;
+WheelVAms2 = WheelVAms;
+WheelVCms2 = WheelVCms;
+Time2 = 250 + Time;
+SumFzN = [SumFzN1;SumFzN2];
+SumFxN = [SumFxN1;SumFxN2];
+SumFyN = [SumFyN1;SumFyN2];
+Time = [Time1;Time2];
+fullVAms = [WheelVAms1;WheelVAms2];
+fullVCms = [WheelVCms1;WheelVCms2];
 % load('RR_03-16-17_9.mat');
 % SumFzN3 = SumFzN;
 % SumFxN3 = SumFxN;
@@ -49,16 +57,10 @@ Time1 = Time;
 % Time = [Time1;Time2;Time3;Time4];
 % fullVAms = [WheelVAms1;WheelVAms2;WheelVAms3;WheelVAms4];
 % fullVCms = [WheelVCms1;WheelVCms2;WheelVCms3;WheelVCms4];
-SumFzN = [SumFzN1];
-SumFxN = [SumFxN1];
-SumFyN = [SumFyN1];
-Time = [Time1];
-fullVAms = [WheelVAms1];
-fullVCms = [WheelVCms1];
 [b,a] = butter(filtorder,(fb/(fs*0.5)),'low');
-filcrrZ = filtfilt(b,a,SumFzN);
-filcrrX = filtfilt(b,a,SumFxN);
-filcrrY = filtfilt(b,a,SumFyN);
+filcrrZ = filter(b,a,SumFzN);
+filcrrX = filter(b,a,SumFxN);
+filcrrY = filter(b,a,SumFyN);
 %% Merging data
 [fx,fy,fz,tb,creepPC]  = breakData(linspeed,Time,filcrrX,filcrrY,filcrrZ,fullVAms,fullVCms);
 sztb = size(tb);
@@ -69,7 +71,7 @@ for n = 1:1:sztb(1)
     for j = 1:1:length(asslen)
             NCreepX(n,asslen(j)) = abs(fx(n,asslen(j))/(mu*fz(n,asslen(j))));
     end
-    NCreepX_m(n) = nanmedian(NCreepX(n,:));
+    NCreepX_m(n) = nanmean(NCreepX(n,:));
 end
 creepint = NCreepX_m(1:find(creepPC == 0.3));
 creepageint = creepPC(1:find(creepPC == 0.3));
