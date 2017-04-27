@@ -201,6 +201,7 @@ for i = 1:1:36
     gofc(i) = gof;
     title(sprintf('Creepage: %0.3f',CreepData(i)),'Fontname','Tahoma','FontSize',10,'FontWeight','Bold','Color',[0 0.7 0]);
     removewhitespace;
+    %% Coherence Testing in loop
     set(0,'CurrentFigure',figcoh{prev});
     h2 = subplotfill(3,3,ctfig);
     set(gca, 'FontSize', fsz, 'LineWidth', alw); %<- Set properties
