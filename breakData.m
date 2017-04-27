@@ -18,15 +18,16 @@ for i = 1:1:length(LookupData)
         tmp = find((abs(wheelVCms - x) < tolC));
         %z = find(abs(filVAms - wheelVCms) < tolA);
         %[lia,locb] = ismember(tmp,z);
-        for j = 1:1:length(tmp)
+        %for j = 1:1:length(tmp)
             %if(lia(j) == true)
-                k(i,tmp(j)) = tmp(j);
-                fx(i,tmp(j)) = rawx(tmp(j));
-                fy(i,tmp(j)) = rawy(tmp(j));
-                fz(i,tmp(j)) = rawz(tmp(j));
+                k(i,tmp) = tmp;
+                fx(i,tmp) = rawx(tmp);
+                fy(i,tmp) = rawy(tmp);
+                fz(i,tmp) = rawz(tmp);
+                tb(i,tmp) = time(tmp);
              %   tb(i,locb(j)) = time(tmp(j));
             %end
-        end
+        %end
 end
 creepPC = CreepData*100;
 figure;
