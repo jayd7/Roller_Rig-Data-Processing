@@ -25,7 +25,7 @@ ft = fittype( 'poly1' );
 
 % Plot fit with data.
 %figure( 'Name', 'Causality Fit' );
-h = plot( fitresult,'-b', xData, yData,'ko');
+h = plot( fitresult,'-b', xData, yData,'k.');
 set(h,'LineWidth',lw);
 %legend( h, 'fx vs. fz', 'untitled fit 1', 'Location', 'NorthEast' );
 % Label axes
