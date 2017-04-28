@@ -219,7 +219,7 @@ for i = 1:1:36
     end
     %grid on;
     box on;
-   %set(gca,'XTickLabel',[],'YTickLabel',[]); 
+    set(gca,'XTickLabel',[],'YTickLabel',[]); 
     title(sprintf('Creepage: %0.3f',CreepData(i)),'Fontname','Tahoma','FontSize',10,'FontWeight','Bold','Color',[0 0.7 0]);
     removewhitespace;
     prev = (i - mod(i,9))/9 + 1;
