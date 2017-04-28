@@ -16,15 +16,16 @@ tb = NaN([length(LookupData),2000000],'double');
 for i = 1:1:length(LookupData)
     x = LookupData(i);
         tmp = find((abs(wheelVCms - x) < tolC));
+        tmptrim = tmp(2000:length(tmp)-500); % trimming 1s from beginning and 0.25s from end
         %z = find(abs(filVAms - wheelVCms) < tolA);
         %[lia,locb] = ismember(tmp,z);
         %for j = 1:1:length(tmp)
             %if(lia(j) == true)
-                k(i,tmp) = tmp;
-                fx(i,tmp) = rawx(tmp);
-                fy(i,tmp) = rawy(tmp);
-                fz(i,tmp) = rawz(tmp);
-                tb(i,tmp) = time(tmp);
+                k(i,tmptrim) = tmptrim;
+                fx(i,tmptrim) = rawx(tmptrim);
+                fy(i,tmptrim) = rawy(tmptrim);
+                fz(i,tmptrim) = rawz(tmptrim);
+                tb(i,tmptrim) = time(tmptrim);
              %   tb(i,locb(j)) = time(tmp(j));
             %end
         %end
