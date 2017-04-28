@@ -5,11 +5,11 @@ cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
-fb = 50;
+fb = 10;
 filtorder = 3;
 linspeed = 3;
 mu = 1;
-repsid = [1,2];
+repsid = [7,8];
 %% Load both files, filter and then merge force data
 load(['RR_',date,'_',num2str(repsid(1)),'.mat']);
 SumFzN1 = SumFzN;
@@ -66,20 +66,28 @@ filcrrY = filter(b,a,SumFyN);
 sztb = size(tb);
 NCreepX = NaN(size(tb),'double');
 NCreepX_m = NaN([sztb(1),1],'double');
+NCreepX_lowci = NaN([sztb(1),1],'double');
+NCreepX_upci = NaN([sztb(1),1],'double');
 for n = 1:1:sztb(1)
     asslen = find(~isnan(fz(n,:)));
-    for j = 1:1:length(asslen)
-            NCreepX(n,asslen(j)) = abs(fx(n,asslen(j))/(mu*fz(n,asslen(j))));
-    end
-    NCreepX_m(n) = nanmean(NCreepX(n,:));
+%     for j = 1:1:length(asslen)
+            NCreepX(n,asslen) = abs(fx(n,asslen)./(mu*fz(n,asslen)));
+%     end
+    [nb,errfit] = compecdf(NCreepX(n,asslen)','Empirical');
+    NCreepX_m(n) = nb(3);
+    NCreepX_lowci(n) = nb(1);
+    NCreepX_upci(n) = nb(2);
 end
 creepint = NCreepX_m(1:find(creepPC == 0.3));
 creepageint = creepPC(1:find(creepPC == 0.3));
 figure;
-    plot(creepPC,NCreepX_m);
-    title(sprintf('Creep-Creepage Plot %0.1f km/h',linspeed));
-    grid on
-    removewhitespace;
+plot(creepPC,NCreepX_m,creepPC,NCreepX_lowci,creepPC,NCreepX_upci);
+title(sprintf('Creep-Creepage Plot %0.1f km/h',linspeed));
+grid on
+removewhitespace;
+legend('50%ile','lower 95% data bound','higher 95% data bound');
+% plotcorr(fz,fx);
+% plothistmat(fz);
 % for nt = 1:1:46
 % figure;
 % %plot(tb(1), fx(1,:),'b');
