@@ -9,11 +9,12 @@ if(strcmp(distname,'Empirical'))
     normbounds = xe(k_fe);
     return
 elseif(strcmp(distname,'Normal'))
-    ff = cdf(pdfit,xe);
+    [fe,xe,flo,fup] = ecdf(data);
     k_fe(1) = find((fe >= 0.0240 & fe <= 0.0259),1,'first');
     k_fe(2) = find((fe >= 0.9740 & fe <= 0.9759),1,'first');
     k_fe(3) = find((fe >= 0.498 & fe <= 0.502),1,'first');
     pdfit = fitdist(data,distname);
+    ff = cdf(pdfit,xe);
     k_ff(1) = find((ff >= 0.0240 & ff <= 0.0259),1,'first');
     k_ff(2) = find((ff >= 0.9740 & ff <= 0.9759),1,'first');
     k_ff(3) = find((ff >= 0.498 & ff <= 0.502),1,'first');
@@ -23,12 +24,15 @@ elseif(strcmp(distname,'Normal'))
     normbounds = xe(k_ff);
     disp(sprintf('Errors b/w Empirical and Normfit estimates: 50ile %0.2f, CI ( %0.2f , %0.2f )',err(3),err(1),err(2)));
 end
-figure('visible','off');
+figure('visible','on');
 hold on
 plot(xe,fe,'b');
-plot(xe,flo,'--y');
-plot(xe,fup,'--y');
-% plot(xe,ff,'r');
-legend('Empirical','Bounds','CDF');
+% plot(xe,flo,'--y');
+% plot(xe,fup,'--y');
+plot(xe,ff,'r');
+legend('Empirical','Normfit');
 title(['Comparing empirical with ',distname]);
+removewhitespace;
+grid on
+box on
 end
