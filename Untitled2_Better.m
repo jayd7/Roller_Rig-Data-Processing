@@ -10,7 +10,9 @@ fb = 10;
 filtorder = 3;
 linspeed = 3;
 mu = 1;
-repsid = [1,8];
+repsid = [5,6];
+binC = -2500;
+binWidth = 10;
 fxfull = [];
 fyfull = [];
 fzfull = [];
@@ -76,28 +78,41 @@ for i = repsid(1):2:repsid(2)
     NCreepX_upci = NaN([sztb(1),1],'double');
     for n = 1:1:sztb(1)
         asslen = find(~isnan(fz(n,:)));
+        [constVCreep,constVfx,constVfz] = getconstVCreep(fz(n,asslen),fx(n,asslen),binC,binWidth);
         %     for j = 1:1:length(asslen)
         NCreepX(n,asslen) = abs(fx(n,asslen)./(mu*fz(n,asslen)));
         NCreepX_m(n) = nanmean(NCreepX(n,asslen));
+        NCreepX_s(n) = std(NCreepX(n,asslen));
+        VCreep_m(n) = mean(constVCreep);
+        VCreep_s(n) = std(constVCreep);
+        VCreep_lo(n) = VCreep_m(n) - 2*(std(constVCreep));
+        VCreep_hi(n) = VCreep_m(n) + 2*(std(constVCreep));
+        NCreepX_lowci(n) = NCreepX_m(n) - 2*(std(NCreepX(n,asslen)));
+        NCreepX_upci(n) = NCreepX_m(n) + 2*(std(NCreepX(n,asslen)));
         %     end
 %         [nb,errfit] = compecdf(NCreepX(n,asslen)','Empirical');
 %         NCreepX_m(n) = nb(3);
-%         NCreepX_lowci(n) = nb(1);
-%         NCreepX_upci(n) = nb(2);       
+      
     end
 %     fxfull = [fxfull;fx];
 %     fyfull = [fyfull;fy];
 %     fzfull = [fzfull;fz];
 %     XCreepFull = [XCreepFull;NCreepX];
 end
-creepint = NCreepX_m(1:find(creepPC == 0.3));
-creepageint = creepPC(1:find(creepPC == 0.3));
 figure;
-plot(creepPC,NCreepX_m,creepPC,NCreepX_lowci,creepPC,NCreepX_upci);
+plot(creepPC,NCreepX_m,creepPC,NCreepX_lowci,creepPC,NCreepX_upci,creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
+% plot(creepPC,VCreep_m,creepPC,NCreepX_m);
 title(sprintf('Creep-Creepage Plot %0.1f km/h',linspeed));
 grid on
 removewhitespace;
-legend('50%ile','lower 95% data bound','higher 95% data bound');
+legend('binned mean','full mean');
+legend('full mean','full low','full high','binned mean','binned low','binned high');
+figure('name','Force Binned Curve');
+plot(creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
+title(sprintf('Force Binned at %0.2f +/- %0.2f',binC,binWidth/2));
+grid on;
+box on;
+removewhitespace;
 % plotcorr(fz,fx);
 % plothistmat(fz);
 % for nt = 1:1:46
