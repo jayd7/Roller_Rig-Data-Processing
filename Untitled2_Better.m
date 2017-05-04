@@ -10,16 +10,17 @@ fb = 10;
 filtorder = 3;
 linspeed = 3;
 mu = 1;
-repsid = [5,6];
-binC = -2500;
-binWidth = 10;
+repsid = [1,10];
+binC = -2000;
+binWidth = 5;
 fxfull = [];
 fyfull = [];
 fzfull = [];
 XCreepFull = [];
 %% Load both files, filter and then merge force data
 for i = repsid(1):2:repsid(2)
-    load(['RR_',date,'_',num2str(i),'.mat']);
+    filen = ['RR_',date,'_',num2str(i),'.mat'];
+    load(filen);
     SumFzN1 = SumFzN;
     SumFxN1 = SumFxN;
     SumFyN1 = SumFyN;
@@ -73,31 +74,55 @@ for i = repsid(1):2:repsid(2)
     [fx,fy,fz,tb,creepPC]  = breakData(linspeed,Time,filcrrX,filcrrY,filcrrZ,fullVAms,fullVCms);
     sztb = size(tb);
     NCreepX = NaN(size(tb),'double');
+    ConstVCreep = NaN(size(tb),'double');
     NCreepX_m = NaN([sztb(1),1],'double');
     NCreepX_lowci = NaN([sztb(1),1],'double');
     NCreepX_upci = NaN([sztb(1),1],'double');
+%     hHist = figure;
     for n = 1:1:sztb(1)
         asslen = find(~isnan(fz(n,:)));
-        [constVCreep,constVfx,constVfz] = getconstVCreep(fz(n,asslen),fx(n,asslen),binC,binWidth);
+        [constVCr,constVfx,constVfz,Kf] = getconstVCreep(fz(n,asslen),fx(n,asslen),binC,binWidth);
         %     for j = 1:1:length(asslen)
         NCreepX(n,asslen) = abs(fx(n,asslen)./(mu*fz(n,asslen)));
+        ConstVCreep(n,Kf) = constVCr;
         NCreepX_m(n) = nanmean(NCreepX(n,asslen));
         NCreepX_s(n) = std(NCreepX(n,asslen));
-        VCreep_m(n) = mean(constVCreep);
-        VCreep_s(n) = std(constVCreep);
-        VCreep_lo(n) = VCreep_m(n) - 2*(std(constVCreep));
-        VCreep_hi(n) = VCreep_m(n) + 2*(std(constVCreep));
+        VCreep_m(n) = mean(constVCr);
+        VCreep_s(n) = std(constVCr);
+        VCreep_lo(n) = VCreep_m(n) - 2*(std(constVCr));
+        VCreep_hi(n) = VCreep_m(n) + 2*(std(constVCr));
         NCreepX_lowci(n) = NCreepX_m(n) - 2*(std(NCreepX(n,asslen)));
         NCreepX_upci(n) = NCreepX_m(n) + 2*(std(NCreepX(n,asslen)));
+        %% Compare Histograms of both binned and full creepages
+%         set(0,'CurrentFigure',hHist);
+%         figure;
+%         subplotfill(1,2,1);
+%         if(isempty(NCreepX(n,asslen)))
+%             continue;
+%         else
+%         histfit(NCreepX(n,asslen));
+%         set(gca,'FontSize',11);
+%         title(sprintf('# %d Full Creepage Lem: %d',n,length(asslen)),'FontSize',12);
+%         xlabel(sprintf('Mean %0.2f SD: %0.2f',mean(NCreepX(n,asslen)),std(NCreepX(n,asslen))),'FontSize',12); 
+%         end
+%         subplotfill(1,2,2);
+%         if(isempty(constVCr))
+%             continue;
+%         else            
+%         histfit(constVCr);
+%         set(gca,'FontSize',11);
+%         title(sprintf('# %d Binned Creepage @ %d N Lem: %d',n,binC,length(constVCr)),'FontSize',12);
+%         xlabel(sprintf('Mean: %0.2f SD: %0.2f',mean(constVCr),std(constVCr)),'FontSize',12);
+%         end
         %     end
 %         [nb,errfit] = compecdf(NCreepX(n,asslen)','Empirical');
 %         NCreepX_m(n) = nb(3);
       
     end
-%     fxfull = [fxfull;fx];
-%     fyfull = [fyfull;fy];
-%     fzfull = [fzfull;fz];
-%     XCreepFull = [XCreepFull;NCreepX];
+    fxfull = [fxfull;fx];
+    fyfull = [fyfull;fy];
+    fzfull = [fzfull;fz];
+    XCreepFull = [XCreepFull;NCreepX];
 end
 figure;
 plot(creepPC,NCreepX_m,creepPC,NCreepX_lowci,creepPC,NCreepX_upci,creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
