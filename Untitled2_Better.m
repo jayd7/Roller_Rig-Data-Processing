@@ -1,8 +1,8 @@
 close all
 clear all
-date = '04-27-17';
-cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\4-27-17');
-% cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\4-28-17');
+date = '05-04-17';
+% cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\4-27-17');
+ cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-4-17');
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
@@ -10,7 +10,7 @@ fb = 10;
 filtorder = 3;
 linspeed = 3;
 mu = 1;
-repsid = [1,10];
+repsid = [1,2];
 binC = -2000;
 binWidth = 5;
 fxfull = [];
@@ -93,27 +93,26 @@ for i = repsid(1):2:repsid(2)
         VCreep_hi(n) = VCreep_m(n) + 2*(std(constVCr));
         NCreepX_lowci(n) = NCreepX_m(n) - 2*(std(NCreepX(n,asslen)));
         NCreepX_upci(n) = NCreepX_m(n) + 2*(std(NCreepX(n,asslen)));
-        %% Compare Histograms of both binned and full creepages
-%         set(0,'CurrentFigure',hHist);
-%         figure;
-%         subplotfill(1,2,1);
-%         if(isempty(NCreepX(n,asslen)))
-%             continue;
-%         else
-%         histfit(NCreepX(n,asslen));
-%         set(gca,'FontSize',11);
-%         title(sprintf('# %d Full Creepage Lem: %d',n,length(asslen)),'FontSize',12);
-%         xlabel(sprintf('Mean %0.2f SD: %0.2f',mean(NCreepX(n,asslen)),std(NCreepX(n,asslen))),'FontSize',12); 
-%         end
-%         subplotfill(1,2,2);
-%         if(isempty(constVCr))
-%             continue;
-%         else            
-%         histfit(constVCr);
-%         set(gca,'FontSize',11);
-%         title(sprintf('# %d Binned Creepage @ %d N Lem: %d',n,binC,length(constVCr)),'FontSize',12);
-%         xlabel(sprintf('Mean: %0.2f SD: %0.2f',mean(constVCr),std(constVCr)),'FontSize',12);
-%         end
+        % Compare Histograms of both binned and full creepages
+        figure;
+        subplotfill(1,2,1);
+        if(isempty(NCreepX(n,asslen)))
+            continue;
+        else
+        histfit(NCreepX(n,asslen));
+        set(gca,'FontSize',11);
+        title(sprintf('# %d Full Creepage Lem: %d',n,length(asslen)),'FontSize',12);
+        xlabel(sprintf('Mean %0.2f SD: %0.2f',mean(NCreepX(n,asslen)),std(NCreepX(n,asslen))),'FontSize',12); 
+        end
+        subplotfill(1,2,2);
+        if(isempty(constVCr))
+            continue;
+        else            
+        histfit(constVCr);
+        set(gca,'FontSize',11);
+        title(sprintf('# %d Binned Creepage @ %d N Lem: %d',n,binC,length(constVCr)),'FontSize',12);
+        xlabel(sprintf('Mean: %0.2f SD: %0.2f',mean(constVCr),std(constVCr)),'FontSize',12);
+        end
         %     end
 %         [nb,errfit] = compecdf(NCreepX(n,asslen)','Empirical');
 %         NCreepX_m(n) = nb(3);
