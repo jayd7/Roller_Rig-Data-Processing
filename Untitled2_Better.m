@@ -1,8 +1,8 @@
 close all
 clear all
 date = '05-04-17';
-% cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\4-27-17');
- cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-4-17');
+ cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-4-17');
+%  cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-4-17');
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
@@ -118,10 +118,10 @@ for i = repsid(1):4:repsid(2)
 %         NCreepX_m(n) = nb(3);
       
     end
-    fxfull = [fxfull;fx];
-    fyfull = [fyfull;fy];
-    fzfull = [fzfull;fz];
-    XCreepFull = [XCreepFull;NCreepX];
+%     fxfull = [fxfull;fx];
+%     fyfull = [fyfull;fy];
+%     fzfull = [fzfull;fz];
+%     XCreepFull = [XCreepFull;NCreepX];
 end
 figure;
 % plot(creepPC,NCreepX_m,creepPC,NCreepX_lowci,creepPC,NCreepX_upci,creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
