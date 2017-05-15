@@ -1,8 +1,8 @@
 close all
 clear all
-date = '05-04-17';
- cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-4-17');
-%  cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-4-17');
+date = '05-08-17';
+ cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-8-17');
+%  cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-8-17');
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
@@ -10,62 +10,86 @@ fb = 10;
 filtorder = 3;
 linspeed = 3;
 mu = 1;
-repsid = [1,1];
+reps = 2; % Number of mat files per expt
+repsid = [1,4]; % start file ID = repsid(1) end file ID = repsid(2)
 binC = -2000;
 binWidth = 5;
 fxfull = [];
 fyfull = [];
 fzfull = [];
 XCreepFull = [];
+XCreep_m = [];
+XCreep_lo = [];
+XCreep_up = [];
+XCreepage = [];
 %% Load both files, filter and then merge force data
-for i = repsid(1):4:repsid(2)
-    filen = ['RR_',date,'_',num2str(i),'.mat'];
-    load(filen);
-    SumFzN1 = SumFzN;
-    SumFxN1 = SumFxN;
-    SumFyN1 = SumFyN;
-    WheelVAms1 = WheelVAms;
-    WheelVCms1 = WheelVCms;
-    Time1 = Time;
-    % SumFzN = [SumFzN1];
-    % SumFxN = [SumFxN1];
-    % SumFyN = [SumFyN1];
-    % Time = [Time1];
-    % fullVAms = [WheelVAms1];
-    % fullVCms = [WheelVCms1];
-    load(['RR_',date,'_',num2str(i+1),'.mat']);
-    SumFzN2 = SumFzN;
-    SumFxN2 = SumFxN;
-    SumFyN2 = SumFyN;
-    WheelVAms2 = WheelVAms;
-    WheelVCms2 = WheelVCms;
-    Time2 = 250 + Time;
-%     SumFzN = [SumFzN1;SumFzN2];
-%     SumFxN = [SumFxN1;SumFxN2];
-%     SumFyN = [SumFyN1;SumFyN2];
-%     Time = [Time1;Time2];
-%     fullVAms = [WheelVAms1;WheelVAms2];
-%     fullVCms = [WheelVCms1;WheelVCms2];
-    load(['RR_',date,'_',num2str(i+2),'.mat']);
-    SumFzN3 = SumFzN;
-    SumFxN3 = SumFxN;
-    SumFyN3 = SumFyN;
-    WheelVAms3 = WheelVAms;
-    WheelVCms3 = WheelVCms;
-    Time3 = 500 + Time;
-    load(['RR_',date,'_',num2str(i+3),'.mat']);
-    SumFzN4 = SumFzN;
-    SumFxN4 = SumFxN;
-    SumFyN4 = SumFyN;
-    WheelVAms4 = WheelVAms;
-    WheelVCms4 = WheelVCms;
-    Time4 = 750 + Time;
-    SumFzN = [SumFzN1;SumFzN2;SumFzN3;SumFzN4];
-    SumFxN = [SumFxN1;SumFxN2;SumFxN3;SumFxN4];
-    SumFyN = [SumFyN1;SumFyN2;SumFyN3;SumFyN4];
-    Time = [Time1;Time2;Time3;Time4];
-    fullVAms = [WheelVAms1;WheelVAms2;WheelVAms3;WheelVAms4];
-    fullVCms = [WheelVCms1;WheelVCms2;WheelVCms3;WheelVCms4];
+for i = repsid(1):reps:repsid(2)
+    if(reps == 0)
+        disp('Error, empty repsid');
+        break;
+    end
+    if(reps >= 1)
+        
+        filen = ['RR_',date,'_',num2str(i),'.mat'];
+        load(filen);
+        SumFzN1 = SumFzN;
+        SumFxN1 = SumFxN;
+        SumFyN1 = SumFyN;
+        WheelVAms1 = WheelVAms;
+        WheelVCms1 = WheelVCms;
+        Time1 = Time;
+        SumFzN = [SumFzN1];
+        SumFxN = [SumFxN1];
+        SumFyN = [SumFyN1];
+        Time = [Time1];
+        fullVAms = [WheelVAms1];
+        fullVCms = [WheelVCms1];
+    end
+    if(reps >= 2)        
+        load(['RR_',date,'_',num2str(i+1),'.mat']);
+        SumFzN2 = SumFzN;
+        SumFxN2 = SumFxN;
+        SumFyN2 = SumFyN;
+        WheelVAms2 = WheelVAms;
+        WheelVCms2 = WheelVCms;
+        Time2 = 250 + Time;
+        SumFzN = [SumFzN1;SumFzN2];
+        SumFxN = [SumFxN1;SumFxN2];
+        SumFyN = [SumFyN1;SumFyN2];
+        Time = [Time1;Time2];
+        fullVAms = [WheelVAms1;WheelVAms2];
+        fullVCms = [WheelVCms1;WheelVCms2];
+    end
+    if(reps >= 3)
+        load(['RR_',date,'_',num2str(i+2),'.mat']);
+        SumFzN3 = SumFzN;
+        SumFxN3 = SumFxN;
+        SumFyN3 = SumFyN;
+        WheelVAms3 = WheelVAms;
+        WheelVCms3 = WheelVCms;
+        Time3 = 500 + Time;
+        SumFzN = [SumFzN1;SumFzN2;SumFzN3];
+        SumFxN = [SumFxN1;SumFxN2;SumFxN3];
+        SumFyN = [SumFyN1;SumFyN2;SumFyN3];
+        Time = [Time1;Time2;Time3];
+        fullVAms = [WheelVAms1;WheelVAms2;WheelVAms3];
+        fullVCms = [WheelVCms1;WheelVCms2;WheelVCms3];
+    end
+    if(reps >= 4)
+        load(['RR_',date,'_',num2str(i+3),'.mat']);
+        SumFzN4 = SumFzN;
+        SumFxN4 = SumFxN;
+        SumFyN4 = SumFyN;
+        WheelVAms4 = WheelVAms;
+        WheelVCms4 = WheelVCms;
+        Time4 = 750 + Time;
+        SumFzN = [SumFzN1;SumFzN2;SumFzN3;SumFzN4];
+        SumFxN = [SumFxN1;SumFxN2;SumFxN3;SumFxN4];
+        SumFyN = [SumFyN1;SumFyN2;SumFyN3;SumFyN4];
+        Time = [Time1;Time2;Time3;Time4];
+        fullVAms = [WheelVAms1;WheelVAms2;WheelVAms3;WheelVAms4];
+        fullVCms = [WheelVCms1;WheelVCms2;WheelVCms3;WheelVCms4];
+    end
     [b,a] = butter(filtorder,(fb/(fs*0.5)),'low');
     filcrrZ = filter(b,a,SumFzN);
     filcrrX = filter(b,a,SumFxN);
@@ -84,7 +108,7 @@ for i = repsid(1):4:repsid(2)
         [constVCr,constVfx,constVfz,Kf] = getconstVCreep(fz(n,asslen),fx(n,asslen),binC,binWidth);
         %     for j = 1:1:length(asslen)
         NCreepX(n,asslen) = abs(fx(n,asslen)./(mu*fz(n,asslen)));
-        ConstVCreep(n,Kf) = constVCr;
+%         ConstVCreep(n,Kf) = constVCr;
         NCreepX_m(n) = nanmean(NCreepX(n,asslen));
         NCreepX_s(n) = std(NCreepX(n,asslen));
         VCreep_m(n) = mean(constVCr);
@@ -93,7 +117,7 @@ for i = repsid(1):4:repsid(2)
         VCreep_hi(n) = VCreep_m(n) + 2*(std(constVCr));
         NCreepX_lowci(n) = NCreepX_m(n) - 2*(std(NCreepX(n,asslen)));
         NCreepX_upci(n) = NCreepX_m(n) + 2*(std(NCreepX(n,asslen)));
-        % Compare Histograms of both binned and full creepages
+%         % Compare Histograms of both binned and full creepages
         figure;
         subplotfill(1,2,1);
         if(isempty(NCreepX(n,asslen)))
@@ -113,7 +137,7 @@ for i = repsid(1):4:repsid(2)
         title(sprintf('# %d Binned Creepage @ %d N Lem: %d',n,binC,length(constVCr)),'FontSize',12);
         xlabel(sprintf('Mean: %0.2f SD: %0.2f',mean(constVCr),std(constVCr)),'FontSize',12);
         end
-        %     end
+%             end
 %         [nb,errfit] = compecdf(NCreepX(n,asslen)','Empirical');
 %         NCreepX_m(n) = nb(3);
       
@@ -122,6 +146,10 @@ for i = repsid(1):4:repsid(2)
 %     fyfull = [fyfull;fy];
 %     fzfull = [fzfull;fz];
 %     XCreepFull = [XCreepFull;NCreepX];
+%     XCreep_m = [XCreep_m;NCreepX_m]; % Generates full array from all iterations of exp
+%     XCreep_lo = [XCreep_lo;NCreepX_lowci];
+%     XCreep_up = [XCreep_up;NCreepX_upci];
+%     XCreepage = [XCreepage;creepPC];
 end
 figure;
 % plot(creepPC,NCreepX_m,creepPC,NCreepX_lowci,creepPC,NCreepX_upci,creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
@@ -131,12 +159,12 @@ title(sprintf('Creep-Creepage Plot %0.1f km/h',linspeed));
 grid on
 removewhitespace;
 legend('full mean','full low','full high');
-figure('name','Force Binned Curve');
-plot(creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
-title(sprintf('Force Binned at %0.2f +/- %0.2f',binC,binWidth/2));
-grid on;
-box on;
-removewhitespace;
+% figure('name','Force Binned Curve');
+% plot(creepPC,VCreep_m,creepPC,VCreep_lo,creepPC,VCreep_hi);
+% title(sprintf('Force Binned at %0.2f +/- %0.2f',binC,binWidth/2));
+% grid on;
+% box on;
+% removewhitespace;
 % plotcorr(fz,fx);
 % plothistmat(fz);
 % for nt = 1:1:46

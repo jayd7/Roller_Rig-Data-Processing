@@ -3,7 +3,7 @@ function bunchtxt2mat(date,startind,endind)
 for i = startind:1:endind
     filen = ['RR_',date,'_',num2str(i)]
     fname = [filen,'.txt'];
-   [Time,WheelFx,WheelFy,WheelFz,MotorFx,MotorFy,MotorFz,WheelVC,WheelVA] = importfile1(fname,1000); %import startrow   = 1s, endRow = EoF
+   [Time,WheelFx,WheelFy,WheelFz,MotorFx,MotorFy,MotorFz,WheelVC,WheelVA] = importfile1(fname,2000); %import startrow   = 1s, endRow = EoF
     [WheelFxN,WheelFyN,WheelFzN,MotorFxN,MotorFyN,MotorFzN] = ForceConvert2N(WheelFx,WheelFy,WheelFz,MotorFx,MotorFy,MotorFz);
     SumFxN = WheelFxN + MotorFxN;
     SumFyN = WheelFyN + MotorFyN;
