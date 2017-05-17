@@ -1,11 +1,14 @@
 %% plot normfits of all 7 sets at 1% Creepage and draw overlapping plots
 close all;
 clear all;
-date = '05-15-17';
-cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-15-17');
+date = '05-16-17';
+cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
 % cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-15-17');
+startexp = 1;
+endexp = 133;
 x_val = 0:0.001:1;
 load('lookupdata_3.0.mat');
+% load('ypd_5-15.mat');
 % cr = 100*creepage;
 z90 = 1.645; z95 = 1.96;
 cc = 1.4826; % Consistency Constant for MAD
@@ -15,7 +18,7 @@ fb = 10; fs = 2000; filtorder = 2;
 [b,a] = butter(filtorder,(fb/(fs*0.5)),'low');
 % creepPC = [ones(1,15),2.9*ones(1,10),0.5*ones(1,10),ones(1,5),0.5,1,0.5,1,0.5,1,.5,1,0.5,1];
 % strcell = cell(1,50);
-for i = 1:1:173   
+for i = startexp:1:endexp   
     fname = ['RR_',date,'_',num2str(i)];
     load(fname);
     VCms = WheelVCms(4000);
@@ -25,10 +28,15 @@ for i = 1:1:173
     filcrrX = filter(b,a,SumFxN);
     filcrrY = filter(b,a,SumFyN);
     NCreepX = filcrrX./filcrrZ;
-    set{i} = NCreepX;
-    pd{i} = fitdist(set{i},'Normal');
-    ypd(i,:) = pdf(pd{i},x_val);
-    meanarr(i) = mean(set{i});
+    NCreepY = filcrrY./filcrrZ;
+    setX{i} = NCreepX;
+    setY{i} = NCreepY;
+    pdX{i} = fitdist(setX{i},'Normal');
+    pdY{i} = fitdist(setY{i},'Normal');
+    ypdX(i,:) = pdf(pdX{i},x_val);
+    ypdY(i,:) = pdf(pdY{i},x_val);
+    meanarrX(i) = mean(setX{i});
+    meanarrY(i) = mean(setY{i});
 end
 %     rng('shuffle','twister');
 %     rnd1 = random(pd1,[1,1000000]);
@@ -54,23 +62,52 @@ end
 %     ypdrnd(i,:) = pdf(pdrnd{i},x_val);
 %     yovall = [set{1}',set{2}',set{3}',set{4}',set{5}',set{6}',set{7}',set{8}',set{9}'];
 %     ovmode = mode(yovall(find(yovall)));
-for j = 3:1:46
-    strcell = {};
-    crpge = CreepData(j)
+    fm5_15 = [];
+    fm5_16 = [];
+    fcr5_15 = [];
+    fcr5_16 = [];
+for j = 1:1:44
+    strcell1 = {};
+    strcell2 = {};
+    crpge = CreepData(j+2)
     figure;
-    k1 = find(cr(1:173) == crpge);
+    k1 = find(cr(startexp:endexp) == crpge);
+%     k2 = find(cr5_15(1:end) == crpge);
 %     strcell = num2str(k1);
     for tmp = 1:length(k1)
-        strcell{tmp} = num2str(k1(tmp));
+        strcell1{tmp} = num2str(k1(tmp));
     end
-    plh = plot(x_val,ypd(k1,:));
-    legend(strcell,'Orientation','Vertical','Location','best');
+    plh = plot(x_val,ypdX(k1,:)); %,x_val,ypd5_15(k2,:),'--');
+    legend(strcell1,'Orientation','Vertical','Location','best');
     title(sprintf('PDF of all 5 Experiments at %0.4f %% Creepage',crpge),'FontSize',12,'FontWeight','Demi');
     xlabel('Normalized Creep Value','FontSize',12,'FontWeight','Demi');
     ylabel('Probability Density Function','FontSize',12,'FontWeight','Demi');
     grid on;
-    axis tight;  
+    axis tight;
+    figure;
+    plot(x_val,ypdY(k1,:));
+    legend(strcell1,'Orientation','Vertical','Location','best');
+    title(sprintf('PDF of all 5 Experiments at %0.4f %% Creepage',crpge),'FontSize',12,'FontWeight','Demi');
+    xlabel('Normalized Lateral Creep Value','FontSize',12,'FontWeight','Demi');
+    ylabel('Probability Density Function','FontSize',12,'FontWeight','Demi');
+    grid on;
+    axis tight;
+%     tm1 = meanarr5_15(k2);
+%     tm2 = meanarr(k1);    
+%     madtm1 = mad(tm1);
+%     medtm1 = median(tm1);
+%     madtm2 = mad(tm2);
+%     medtm2 = median(tm2);
+%     ktm1 = find( tm1 > medtm1 - z90*cc*madtm1 & tm1 < medtm1 + z90*cc*madtm1);
+%     ktm2 = find( tm2 > medtm2 - z90*cc*madtm2 & tm2 < medtm2 + z90*cc*madtm2);
+%     fm5_15 = [fm5_15,tm1(ktm1)];
+%     fm5_16 = [fm5_16,tm2(ktm2)];
+%     fcr5_15 = [fcr5_15,crpge*ones(size(ktm1))];
+%     fcr5_16 = [fcr5_16,crpge*ones(size(ktm2))];
+    
 end
+% fm = [fm5_15,fm5_16];
+% fcr = [fcr5_15,fcr5_16];
 %     figure;
 %     k2 = find(cr == 2.9);
 %         for i = 1:length(k2)
