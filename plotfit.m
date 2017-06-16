@@ -18,13 +18,14 @@ function [fitresult, gof] = plotfit(fz, fx,lw)
 [xData, yData] = prepareCurveData( fz, fx );
 
 % Set up fittype and options.
-ft = fittype( 'poly1' );
+ft = fittype( 'rat11' );
 
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft );
 
 % Plot fit with data.
 %figure( 'Name', 'Causality Fit' );
+% h = plot( fitresult,'-b');
 h = plot( fitresult,'-b', xData, yData,'k.');
 set(h,'LineWidth',lw);
 %legend( h, 'fx vs. fz', 'untitled fit 1', 'Location', 'NorthEast' );

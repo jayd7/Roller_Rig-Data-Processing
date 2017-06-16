@@ -1,20 +1,26 @@
 %% plot normfits of all 7 sets at 1% Creepage and draw overlapping plots
 close all;
 clear all;
-date = '05-16-17';
-cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
-% cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-15-17');
+date = '06-16-17';
+cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\6-16-17');
+% cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
+mu = 1; % traction forces are normalized by wheel load
 startexp = 1;
-endexp = 133;
+endexp = 42;
 x_val = 0:0.001:1;
 load('lookupdata_3.0.mat');
-% load('ypd_5-15.mat');
+% load('ypd_5-15.mat'); %ypd5-15 removed outlier
+% load('mean5-10.mat');
+% load('lateralcrpge.mat');
+% meanarr5_10 = meanarr;
+% meanarr = [];
+% cr5_10 = 0.01*creepPC;
 % cr = 100*creepage;
 z90 = 1.645; z95 = 1.96;
 cc = 1.4826; % Consistency Constant for MAD
 trunmeanarr = cell(46,1);
 fullmeanarr = cell(46,1);
-fb = 10; fs = 2000; filtorder = 2;
+fb = 5; fs = 2000; filtorder = 2;
 [b,a] = butter(filtorder,(fb/(fs*0.5)),'low');
 % creepPC = [ones(1,15),2.9*ones(1,10),0.5*ones(1,10),ones(1,5),0.5,1,0.5,1,0.5,1,.5,1,0.5,1];
 % strcell = cell(1,50);
@@ -24,11 +30,21 @@ for i = startexp:1:endexp
     VCms = WheelVCms(4000);
     kVC = find(LookupData < (VCms + 0.0005) & (LookupData > (VCms - 0.0005)));
     cr(i) = CreepData(kVC);
-    filcrrZ = filter(b,a,SumFzN);
-    filcrrX = filter(b,a,SumFxN);
-    filcrrY = filter(b,a,SumFyN);
-    NCreepX = filcrrX./filcrrZ;
-    NCreepY = filcrrY./filcrrZ;
+    filcrrZ = filtfilt(b,a,SumFzN);
+    filcrrX = filtfilt(b,a,SumFxN);
+    filcrrY = filtfilt(b,a,SumFyN);
+    [rx,px,rlx,rux] = corrcoef(filcrrX,filcrrZ);
+    corrx(i) = rx(1,2);
+    corrxp(i) = px(1,2);
+    corrx_lo(i) = rlx(1,2);
+    corrx_hi(i) = rux(1,2);
+    [ry,py,rly,ruy] = corrcoef(filcrrY,filcrrZ);
+    corry(i) = ry(1,2);
+    corryp(i) = py(1,2);
+    corry_lo(i) = rly(1,2);
+    corry_hi(i) = ruy(1,2);
+    NCreepX = filcrrX./(mu*filcrrZ);
+    NCreepY = filcrrY./(mu*filcrrZ);
     setX{i} = NCreepX;
     setY{i} = NCreepY;
     pdX{i} = fitdist(setX{i},'Normal');
@@ -37,7 +53,10 @@ for i = startexp:1:endexp
     ypdY(i,:) = pdf(pdY{i},x_val);
     meanarrX(i) = mean(setX{i});
     meanarrY(i) = mean(setY{i});
+    meanarrZ(i) = mean(filcrrZ);
 end
+% catarr = [meanarrX,meanarr5_15];
+% catcrr = [cr,cr5_15];
 %     rng('shuffle','twister');
 %     rnd1 = random(pd1,[1,1000000]);
 %     rng('shuffle','twister');
@@ -66,39 +85,53 @@ end
     fm5_16 = [];
     fcr5_15 = [];
     fcr5_16 = [];
+%     tmparr = meanarr5_15(1:end);
+%     tmpcr = cr5_15(45:end);
 for j = 1:1:44
     strcell1 = {};
     strcell2 = {};
-    crpge = CreepData(j+2)
+    tmX = [];
+    crpge(j) = CreepData(j+2);
     figure;
-    k1 = find(cr(startexp:endexp) == crpge);
+    k1 = find(cr(startexp:endexp) == crpge(j));
 %     k2 = find(cr5_15(1:end) == crpge);
 %     strcell = num2str(k1);
     for tmp = 1:length(k1)
         strcell1{tmp} = num2str(k1(tmp));
     end
-    plh = plot(x_val,ypdX(k1,:)); %,x_val,ypd5_15(k2,:),'--');
-    legend(strcell1,'Orientation','Vertical','Location','best');
-    title(sprintf('PDF of all 5 Experiments at %0.4f %% Creepage',crpge),'FontSize',12,'FontWeight','Demi');
-    xlabel('Normalized Creep Value','FontSize',12,'FontWeight','Demi');
-    ylabel('Probability Density Function','FontSize',12,'FontWeight','Demi');
-    grid on;
-    axis tight;
-    figure;
-    plot(x_val,ypdY(k1,:));
-    legend(strcell1,'Orientation','Vertical','Location','best');
-    title(sprintf('PDF of all 5 Experiments at %0.4f %% Creepage',crpge),'FontSize',12,'FontWeight','Demi');
-    xlabel('Normalized Lateral Creep Value','FontSize',12,'FontWeight','Demi');
-    ylabel('Probability Density Function','FontSize',12,'FontWeight','Demi');
-    grid on;
-    axis tight;
-%     tm1 = meanarr5_15(k2);
-%     tm2 = meanarr(k1);    
-%     madtm1 = mad(tm1);
-%     medtm1 = median(tm1);
+%     plh = plot(x_val,ypdX(k1,:)); %,x_val,ypd5_15(k2,:),'--');
+%     legend(strcell1,'Orientation','Vertical','Location','best');
+%     title(sprintf('PDF of all 5 Experiments at %0.4f %% Creepage',crpge(j)),'FontSize',12,'FontWeight','Demi');
+%     xlabel('Normalized Creep Value','FontSize',12,'FontWeight','Demi');
+%     ylabel('Probability Density Function','FontSize',12,'FontWeight','Demi');
+%     grid on;
+%     axis tight;
+%     figure;
+%     plot(x_val,ypdY(k1,:));
+%     legend(strcell1,'Orientation','Vertical','Location','best');
+%     title(sprintf('PDF of all 5 Experiments at %0.4f %% Creepage',crpge(j)),'FontSize',12,'FontWeight','Demi');
+%     xlabel('Normalized Lateral Creep Value','FontSize',12,'FontWeight','Demi');
+%     ylabel('Probability Density Function','FontSize',12,'FontWeight','Demi');
+%     grid on;
+%     axis tight;
+%     k2 = find(cr5_15 == crpge(j));
+    tmX = [meanarrX(k1)];    
+    madtm = mad(tmX,1);
+    medtm = median(tmX);
+    ktm = find( tmX > medtm - z90*cc*madtm & tmX < medtm + z90*cc*madtm);
+    commeanX(j) = mean(tmX(ktm));
+    comlociX(j) = mean(tmX(ktm)) - z90*std(tmX(ktm));
+    comhiciX(j) = mean(tmX(ktm)) + z90*std(tmX(ktm));
+    tmY = [meanarrY(k1)];    
+    madtmY = mad(tmY,1);
+    medtmY = median(tmY);
+    ktmY = find( tmY > medtmY - z90*cc*madtmY & tmY < medtmY + z90*cc*madtmY);
+    commeanY(j) = mean(tmY(ktmY));
+    comlociY(j) = mean(tmY(ktmY)) - z90*std(tmY(ktmY));
+    comhiciY(j) = mean(tmY(ktmY)) + z90*std(tmY(ktmY));
 %     madtm2 = mad(tm2);
 %     medtm2 = median(tm2);
-%     ktm1 = find( tm1 > medtm1 - z90*cc*madtm1 & tm1 < medtm1 + z90*cc*madtm1);
+
 %     ktm2 = find( tm2 > medtm2 - z90*cc*madtm2 & tm2 < medtm2 + z90*cc*madtm2);
 %     fm5_15 = [fm5_15,tm1(ktm1)];
 %     fm5_16 = [fm5_16,tm2(ktm2)];
@@ -106,6 +139,20 @@ for j = 1:1:44
 %     fcr5_16 = [fcr5_16,crpge*ones(size(ktm2))];
     
 end
+figure;
+hold on;
+createFit1(crpge,commeanX);
+createFit1(crpge,comlociX);
+createFit1(crpge,comhiciX);
+hold off;
+title('Curve Fit X Direction');
+figure;
+hold on;
+createFit1(crpge,commeanY);
+createFit1(crpge,comlociY);
+createFit1(crpge,comhiciY);
+hold off;
+title('Curve Fit Y Direction');
 % fm = [fm5_15,fm5_16];
 % fcr = [fcr5_15,fcr5_16];
 %     figure;

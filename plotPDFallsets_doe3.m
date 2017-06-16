@@ -1,10 +1,11 @@
 %% plot normfits of all 7 sets at 1% Creepage and draw overlapping plots
 close all;
 clear all;
-date = '05-16-17';
-cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
+date = '05-10-17';
+cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-10-17');
 x_val = 0:0.001:1;
 load('lookupdata_3.0.mat');
+
 cr = 100*CreepData;
 z90 = 1.645; z95 = 1.96;
 cc = 1.4826; % Consistency Constant for MAD

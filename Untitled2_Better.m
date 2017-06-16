@@ -1,8 +1,8 @@
 close all
 clear all
-date = '05-08-17';
- cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-8-17');
-%  cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-8-17');
+date = '06-13-17';
+%  cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\06-13-17');
+ cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\6-13-17');
 %% Parameter Definitions
 rollerW = 0.08; % Not changed for higher speeds
 fs = 2000;
@@ -10,8 +10,8 @@ fb = 10;
 filtorder = 3;
 linspeed = 3;
 mu = 1;
-reps = 2; % Number of mat files per expt
-repsid = [1,4]; % start file ID = repsid(1) end file ID = repsid(2)
+reps = 3; % Number of mat files per expt
+repsid = [2,7]; % start file ID = repsid(1) end file ID = repsid(2)
 binC = -2000;
 binWidth = 5;
 fxfull = [];
