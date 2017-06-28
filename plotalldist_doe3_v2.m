@@ -1,12 +1,12 @@
 %% plot normfits of all 7 sets at 1% Creepage and draw overlapping plots
-close all;
+%  close all;
 clear all;
-date = '06-16-17';
-cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\6-16-17');
+date = '6-28-17';
+cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\6-28-17');
 % cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
 mu = 1; % traction forces are normalized by wheel load
 startexp = 1;
-endexp = 42;
+endexp = 7;
 x_val = 0:0.001:1;
 load('lookupdata_3.0.mat');
 % load('ypd_5-15.mat'); %ypd5-15 removed outlier
@@ -27,33 +27,43 @@ fb = 5; fs = 2000; filtorder = 2;
 for i = startexp:1:endexp   
     fname = ['RR_',date,'_',num2str(i)];
     load(fname);
-    VCms = WheelVCms(4000);
+    VCms = WheelVCms(2000);
     kVC = find(LookupData < (VCms + 0.0005) & (LookupData > (VCms - 0.0005)));
-    cr(i) = CreepData(kVC);
-    filcrrZ = filtfilt(b,a,SumFzN);
-    filcrrX = filtfilt(b,a,SumFxN);
-    filcrrY = filtfilt(b,a,SumFyN);
-    [rx,px,rlx,rux] = corrcoef(filcrrX,filcrrZ);
-    corrx(i) = rx(1,2);
-    corrxp(i) = px(1,2);
-    corrx_lo(i) = rlx(1,2);
-    corrx_hi(i) = rux(1,2);
-    [ry,py,rly,ruy] = corrcoef(filcrrY,filcrrZ);
-    corry(i) = ry(1,2);
-    corryp(i) = py(1,2);
-    corry_lo(i) = rly(1,2);
-    corry_hi(i) = ruy(1,2);
-    NCreepX = filcrrX./(mu*filcrrZ);
-    NCreepY = filcrrY./(mu*filcrrZ);
-    setX{i} = NCreepX;
-    setY{i} = NCreepY;
-    pdX{i} = fitdist(setX{i},'Normal');
-    pdY{i} = fitdist(setY{i},'Normal');
-    ypdX(i,:) = pdf(pdX{i},x_val);
-    ypdY(i,:) = pdf(pdY{i},x_val);
-    meanarrX(i) = mean(setX{i});
-    meanarrY(i) = mean(setY{i});
-    meanarrZ(i) = mean(filcrrZ);
+    if(~isempty(kVC))
+        
+        cr(i-startexp+1) = CreepData(kVC);
+        filcrrZ = filtfilt(b,a,SumFzN);
+        filcrrX = filtfilt(b,a,SumFxN);
+        filcrrY = filtfilt(b,a,SumFyN);
+        k_fc = find(filcrrZ <= (mean(filcrrZ) + 15) & filcrrZ >= (mean(filcrrZ) - 15));
+        [rx,px,rlx,rux] = corrcoef(filcrrX,filcrrZ);
+        corrx(i) = rx(1,2);
+        corrxp(i) = px(1,2);
+        corrx_lo(i) = rlx(1,2);
+        corrx_hi(i) = rux(1,2);
+        [ry,py,rly,ruy] = corrcoef(filcrrY,filcrrZ);
+        corry(i) = ry(1,2);
+        corryp(i) = py(1,2);
+        corry_lo(i) = rly(1,2);
+        corry_hi(i) = ruy(1,2);
+        NCreepFC{i-startexp+1} = filcrrX(k_fc)./filcrrZ(k_fc);
+        NCreepX = filcrrX./(mu*filcrrZ);
+        NCreepY = filcrrY./(mu*filcrrZ);
+        setX{i} = NCreepX;
+        setY{i} = NCreepY;
+%         pdX{i} = fitdist(setX{i},'Normal');
+%         pdY{i} = fitdist(setY{i},'Normal');
+%         ypdX(i,:) = pdf(pdX{i},x_val);
+%         ypdY(i,:) = pdf(pdY{i},x_val);
+k_fc_outrem = find(NCreepFC{i-startexp+1} >= median(NCreepFC{i-startexp+1}) - z95*cc*mad(NCreepFC{i-startexp+1},1) & NCreepFC{i-startexp+1} <= median(NCreepFC{i-startexp+1}) + z95*cc*mad(NCreepFC{i-startexp+1},1));
+        meanarrXFC(i-startexp+1) = mean(NCreepFC{i-startexp+1}(k_fc_outrem));
+        meanarrX(i-startexp+1) = mean(setX{i});
+        meanarrY(i-startexp+1) = mean(setY{i});
+        meanarrZ(i-startexp+1) = mean(filcrrZ);
+    else
+        fprintf('Excluded point is: %d \n',i);
+        continue;
+    end
 end
 % catarr = [meanarrX,meanarr5_15];
 % catcrr = [cr,cr5_15];
@@ -87,13 +97,13 @@ end
     fcr5_16 = [];
 %     tmparr = meanarr5_15(1:end);
 %     tmpcr = cr5_15(45:end);
-for j = 1:1:44
+for j = 1:1:46
     strcell1 = {};
     strcell2 = {};
     tmX = [];
-    crpge(j) = CreepData(j+2);
+    crpge(j) = CreepData(j);
     figure;
-    k1 = find(cr(startexp:endexp) == crpge(j));
+    k1 = find(cr == crpge(j));
 %     k2 = find(cr5_15(1:end) == crpge);
 %     strcell = num2str(k1);
     for tmp = 1:length(k1)
@@ -119,7 +129,8 @@ for j = 1:1:44
     madtm = mad(tmX,1);
     medtm = median(tmX);
     ktm = find( tmX > medtm - z90*cc*madtm & tmX < medtm + z90*cc*madtm);
-    commeanX(j) = mean(tmX(ktm));
+    commeanX(j) = mean(tmX(ktm)); %Removing Outliers
+% commeanX(j) = mean(tmX); % Not removing outliers
     comlociX(j) = mean(tmX(ktm)) - z90*std(tmX(ktm));
     comhiciX(j) = mean(tmX(ktm)) + z90*std(tmX(ktm));
     tmY = [meanarrY(k1)];    
@@ -139,20 +150,20 @@ for j = 1:1:44
 %     fcr5_16 = [fcr5_16,crpge*ones(size(ktm2))];
     
 end
-figure;
-hold on;
-createFit1(crpge,commeanX);
-createFit1(crpge,comlociX);
-createFit1(crpge,comhiciX);
-hold off;
-title('Curve Fit X Direction');
-figure;
-hold on;
-createFit1(crpge,commeanY);
-createFit1(crpge,comlociY);
-createFit1(crpge,comhiciY);
-hold off;
-title('Curve Fit Y Direction');
+% figure;
+% hold on;
+% createFit1(crpge,commeanX);
+% createFit1(crpge,comlociX);
+% createFit1(crpge,comhiciX);
+% hold off;
+% title('Curve Fit X Direction');
+% figure;
+% hold on;
+% createFit1(crpge,commeanY);
+% createFit1(crpge,comlociY);
+% createFit1(crpge,comhiciY);
+% hold off;
+% title('Curve Fit Y Direction');
 % fm = [fm5_15,fm5_16];
 % fcr = [fcr5_15,fcr5_16];
 %     figure;
