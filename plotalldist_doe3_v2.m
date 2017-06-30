@@ -5,8 +5,8 @@ date = '6-28-17';
 cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\6-28-17');
 % cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
 mu = 1; % traction forces are normalized by wheel load
-startexp = 1;
-endexp = 7;
+startexp = 11;
+endexp = 40;
 x_val = 0:0.001:1;
 load('lookupdata_3.0.mat');
 % load('ypd_5-15.mat'); %ypd5-15 removed outlier
@@ -137,6 +137,12 @@ for j = 1:1:46
     madtmY = mad(tmY,1);
     medtmY = median(tmY);
     ktmY = find( tmY > medtmY - z90*cc*madtmY & tmY < medtmY + z90*cc*madtmY);
+    if(isempty(ktm))
+        continue;
+    else
+        meanarrX_outrem = tmX(ktm);
+        [muhat,sigmahat] = normfit(meanarrX_outrem);
+    end
     commeanY(j) = mean(tmY(ktmY));
     comlociY(j) = mean(tmY(ktmY)) - z90*std(tmY(ktmY));
     comhiciY(j) = mean(tmY(ktmY)) + z90*std(tmY(ktmY));
@@ -150,6 +156,28 @@ for j = 1:1:46
 %     fcr5_16 = [fcr5_16,crpge*ones(size(ktm2))];
     
 end
+x_val = 0.04:0.001:0.2;
+for i = 1:1:length(x_val);
+if(~isempty(find(meanarrX_outrem >= x_val(i) - 0.0005 & meanarrX_outrem <= x_val(i) + 0.0005)));
+    lia(i) = i;
+end
+end
+% lia = ismember(meanarrX_outrem,x_val);
+% ind = find(lia);
+pdX = fitdist(meanarrX_outrem','Normal');
+ypdX = pdf(pdX,x_val);
+me = mean(meanarrX_outrem);
+sd = std(meanarrX_outrem);
+hi = mean(meanarrX_outrem) + 2*std(meanarrX_outrem)
+lo = mean(meanarrX_outrem) - 2*std(meanarrX_outrem);
+hi = mean(meanarrX_outrem) + 2*std(meanarrX_outrem)
+figure;
+hold on;
+plot(x_val,ypdX,'-',x_val(find(lia)),ypdX(find(lia)),'o');
+plot([lo,lo],ylim,'--k',[hi,hi],ylim,'--k',[me,me],ylim,'--g');
+title(sprintf('Normalized Creep: %0.2f +/- %0.2f @ Longitudinal Creepage: 0.8%%', me,2*sd)); 
+
+
 % figure;
 % hold on;
 % createFit1(crpge,commeanX);
