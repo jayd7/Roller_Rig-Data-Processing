@@ -1,7 +1,7 @@
 function plotPSD(inseries1,inseries2,inseries3)
 nsample = length(inseries1);
 % nfft = nextpow2(nsample/2);
-nfft = 2^12;
+nfft = 2^18;
 windowsize = nfft;
 ovlp = nfft/2;
 fs = 2000;

@@ -1,12 +1,12 @@
 %% plot normfits of all 7 sets at 1% Creepage and draw overlapping plots
 %  close all;
 clear all;
-date = '6-28-17';
-cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\6-28-17');
+date = '05-16-17';
+cd('C:\Users\CVeSS\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
 % cd('C:\Users\Jay Dixit\Google Drive\CVeSS\Roller Rig Workstation\Roller Rig Test Data\February\5-16-17');
 mu = 1; % traction forces are normalized by wheel load
-startexp = 11;
-endexp = 40;
+startexp = 1;
+endexp = 173;
 x_val = 0:0.001:1;
 load('lookupdata_3.0.mat');
 % load('ypd_5-15.mat'); %ypd5-15 removed outlier
@@ -20,7 +20,7 @@ z90 = 1.645; z95 = 1.96;
 cc = 1.4826; % Consistency Constant for MAD
 trunmeanarr = cell(46,1);
 fullmeanarr = cell(46,1);
-fb = 5; fs = 2000; filtorder = 2;
+fb = 10; fs = 2000; filtorder = 2;
 [b,a] = butter(filtorder,(fb/(fs*0.5)),'low');
 % creepPC = [ones(1,15),2.9*ones(1,10),0.5*ones(1,10),ones(1,5),0.5,1,0.5,1,0.5,1,.5,1,0.5,1];
 % strcell = cell(1,50);
@@ -35,6 +35,9 @@ for i = startexp:1:endexp
         filcrrZ = filtfilt(b,a,SumFzN);
         filcrrX = filtfilt(b,a,SumFxN);
         filcrrY = filtfilt(b,a,SumFyN);
+        filtX(i,:) = filcrrX;
+        filtZ(i,:) = filcrrZ;
+        filtY(i,:) = filcrrY;
         k_fc = find(filcrrZ <= (mean(filcrrZ) + 15) & filcrrZ >= (mean(filcrrZ) - 15));
         [rx,px,rlx,rux] = corrcoef(filcrrX,filcrrZ);
         corrx(i) = rx(1,2);
@@ -49,16 +52,16 @@ for i = startexp:1:endexp
         NCreepFC{i-startexp+1} = filcrrX(k_fc)./filcrrZ(k_fc);
         NCreepX = filcrrX./(mu*filcrrZ);
         NCreepY = filcrrY./(mu*filcrrZ);
-        setX{i} = NCreepX;
-        setY{i} = NCreepY;
+        setX(i,:) = NCreepX;
+        setY(i,:) = NCreepY;
 %         pdX{i} = fitdist(setX{i},'Normal');
 %         pdY{i} = fitdist(setY{i},'Normal');
 %         ypdX(i,:) = pdf(pdX{i},x_val);
 %         ypdY(i,:) = pdf(pdY{i},x_val);
 k_fc_outrem = find(NCreepFC{i-startexp+1} >= median(NCreepFC{i-startexp+1}) - z95*cc*mad(NCreepFC{i-startexp+1},1) & NCreepFC{i-startexp+1} <= median(NCreepFC{i-startexp+1}) + z95*cc*mad(NCreepFC{i-startexp+1},1));
         meanarrXFC(i-startexp+1) = mean(NCreepFC{i-startexp+1}(k_fc_outrem));
-        meanarrX(i-startexp+1) = mean(setX{i});
-        meanarrY(i-startexp+1) = mean(setY{i});
+        meanarrX(i-startexp+1) = mean(NCreepX);
+        meanarrY(i-startexp+1) = mean(NCreepY);
         meanarrZ(i-startexp+1) = mean(filcrrZ);
     else
         fprintf('Excluded point is: %d \n',i);
@@ -102,7 +105,7 @@ for j = 1:1:46
     strcell2 = {};
     tmX = [];
     crpge(j) = CreepData(j);
-    figure;
+%     figure;
     k1 = find(cr == crpge(j));
 %     k2 = find(cr5_15(1:end) == crpge);
 %     strcell = num2str(k1);
@@ -154,11 +157,32 @@ for j = 1:1:46
 %     fm5_16 = [fm5_16,tm2(ktm2)];
 %     fcr5_15 = [fcr5_15,crpge*ones(size(ktm1))];
 %     fcr5_16 = [fcr5_16,crpge*ones(size(ktm2))];
-    
+% x_val = 0.04:0.001:0.5;
+% for i = 1:1:length(x_val);
+% if(~isempty(find(meanarrX_outrem >= x_val(i) - 0.001 & meanarrX_outrem <= x_val(i) + 0.001)));
+%     lia(i) = i;
+% end
+% end
+% % lia = ismember(meanarrX_outrem,x_val);
+% % ind = find(lia);
+% pdX = fitdist(meanarrX_outrem','Normal');
+% ypdX = pdf(pdX,x_val);
+% me = mean(meanarrX_outrem);
+% sd = std(meanarrX_outrem);
+% hi = mean(meanarrX_outrem) + 2*std(meanarrX_outrem)
+% lo = mean(meanarrX_outrem) - 2*std(meanarrX_outrem);
+% hi = mean(meanarrX_outrem) + 2*std(meanarrX_outrem)
+% figure;
+% hold on;
+% plot(x_val,ypdX,'-',x_val(find(lia)),ypdX(find(lia)),'o');
+% plot([lo,lo],ylim,'--k',[hi,hi],ylim,'--k',[me,me],ylim,'--g');
+% title(sprintf('Normalized Creep: %0.2f +/- %0.2f @ Longitudinal Creepage: %0.1f', me,2*sd,j)); 
+%     
 end
-x_val = 0.04:0.001:0.2;
+x_val = 0.1 + 0.04:0.001:0.5;
+meanarrX_outrem = meanarrX_outrem + 0.1;
 for i = 1:1:length(x_val);
-if(~isempty(find(meanarrX_outrem >= x_val(i) - 0.0005 & meanarrX_outrem <= x_val(i) + 0.0005)));
+if(~isempty(find(meanarrX_outrem >= x_val(i) - 0.001 & meanarrX_outrem <= x_val(i) + 0.001)));
     lia(i) = i;
 end
 end
@@ -176,7 +200,7 @@ hold on;
 plot(x_val,ypdX,'-',x_val(find(lia)),ypdX(find(lia)),'o');
 plot([lo,lo],ylim,'--k',[hi,hi],ylim,'--k',[me,me],ylim,'--g');
 title(sprintf('Normalized Creep: %0.2f +/- %0.2f @ Longitudinal Creepage: 0.8%%', me,2*sd)); 
-
+    
 
 % figure;
 % hold on;
